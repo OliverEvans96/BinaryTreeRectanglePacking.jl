@@ -2,3 +2,6 @@ name = "BinaryTreeRectanglePacking"
 uuid = "25692f88-2806-42e8-abfe-3ab8fae20e0c"
 authors = ["Oliver Evans <oliverevans96@gmail.com>"]
 version = "0.1.0"
+
+[deps]
+AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"

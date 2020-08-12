@@ -13,7 +13,7 @@ export
 	isleaf,
 	samesize,
 	area,
-	⊂
+	fits
 
 # Binary Tree Struct
 # From [AbstractTrees.jl examples](https://github.com/JuliaCollections/AbstractTrees.jl/tree/master/examples)
@@ -115,7 +115,7 @@ Base.pairs(node::BinaryNode) = enumerate(node)
 AbstractTrees.printnode(io::IO, node::BinaryNode) = print(io, node.data)
 
 max_side(r::RectangleSize) = max(r.width, r.height)
-⊂(small::RectangleSize, big::Rectangle) = small.width <= big.width && small.height <= big.height
+fits(small::RectangleSize, big::Rectangle) = small.width <= big.width && small.height <= big.height
 isleaf(node::BinaryNode) = !(isdefined(node, :left) || isdefined(node, :right))
 samesize(r1::AbstractRectangle, r2::AbstractRectangle) = r1.width == r2.width && r1.height == r2.height
 area(r::Rectangle) = r.width * r.height

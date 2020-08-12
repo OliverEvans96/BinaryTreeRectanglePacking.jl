@@ -18,7 +18,7 @@ function insert!(node::BinaryNode{<:AbstractRectangle{T}}, rect::RectangleSize) 
 		if ismissing(space.data)
 			if samesize(rect, space)
 				return replace!(node, rect)
-			elseif rect ⊂ space
+			elseif fits(rect, space)
 				new_rect = Rectangle(
 					rect.data,
 					space.x,

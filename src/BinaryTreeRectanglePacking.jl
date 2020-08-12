@@ -36,6 +36,8 @@ function run(W::Real, H::Real, num_shapes::Integer, num_rectangles::Integer; plo
 	if plot
 		Plotting.plot(root)
 	end
+
+	return root
 end
 
 end # module

@@ -1,0 +1,4 @@
+name = "BinaryTreeRectanglePacking"
+uuid = "25692f88-2806-42e8-abfe-3ab8fae20e0c"
+authors = ["Oliver Evans <oliverevans96@gmail.com>"]
+version = "0.1.0"

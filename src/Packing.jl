@@ -2,110 +2,112 @@ module Packing
 
 using ..Structs
 
+export max_side, PackResult, pack
+
 # Packing Algorithm
 # Inspired by [this blog post](https://blackpawn.com/texts/lightmaps/default.html)
 
-function insert!(node::BinaryNode{<:AbstractRectangle{T}}, rect::RectangleSize) where T
-	if !isleaf(node)
-		new_node = insert!(node.left, rect)
-		if new_node != nothing
-			return new_node
-		else
-			return insert!(node.right, rect)
-		end
-	else
-		space = node.data
-		if ismissing(space.data)
-			if samesize(rect, space)
-				return replace!(node, rect)
-			elseif fits(rect, space)
-				new_rect = Rectangle(
-					rect.data,
-					space.x,
-					space.y,
-					rect.width,
-					rect.height
-				)
 
-				# Decide which way to split
-				# We want to split the larger dimension first
-				# to leave as much space as possible
-				dw = space.width - rect.width
-				dh = space.height - rect.height
+PackResult = Vector{Union{NTuple{N,Float64},Nothing}} where {N}
 
-				if dw > dh
-					# Split width
-					new_space_1 = Rectangle{Int}(
-						missing,
-						space.x,
-						space.y,
-						rect.width,
-						space.height,
-					)
-					new_space_2 = Rectangle{Int}(
-						missing,
-						space.x + rect.width,
-						space.y,
-						space.width - rect.width,
-						space.height,
-					)
-					new_space_3 = Rectangle{Int}(
-						missing,
-						space.x,
-						space.y + rect.height,
-						rect.width,
-						space.height - rect.height,
-					)
+function partition!(
+    node::SpaceNode{N},
+    dim::Integer,
+    pos::Real,
+)::NTuple{2,SpaceNode{N}} where {N}
+    space = node.data
 
-					new_space_node_1 = leftchild!(node, new_space_1)
-					new_space_node_2 = rightchild!(node, new_space_2)
-					new_rect_node = leftchild!(new_space_node_1, new_rect)
-					new_space_node_3 = rightchild!(new_space_node_1, new_space_3)
-					return new_rect_node
-				else
-					# Split height
-					new_space_1 = Rectangle{T}(
-						missing,
-						space.x,
-						space.y,
-						space.width,
-						rect.height,
-					)
-					new_space_2 = Rectangle{T}(
-						missing,
-						space.x,
-						space.y + rect.height,
-						space.width,
-						space.height - rect.height,
-					)
-					new_space_3 = Rectangle{T}(
-						missing,
-						space.x + rect.width,
-						space.y,
-						space.width - rect.width,
-						rect.height,
-					)
+    left_dims = Tuple(
+        i == dim ? pos : space.rect.dims[i]
+        for i=1:N
+    )
+    left_pos = space.rect.pos
 
-					new_space_node_1 = leftchild!(node, new_space_1)
-					new_space_node_2 = rightchild!(node, new_space_2)
-					new_rect_node = leftchild!(new_space_node_1, new_rect)
-					new_space_node_3 = rightchild!(new_space_node_1, new_space_3)
-					return new_rect_node
-				end
-			end
-		end
-	end
-	return nothing
+    right_dims = Tuple(
+        i == dim ? space.rect.dims[i] - pos : space.rect.dims[i]
+        for i=1:N
+    )
+    right_pos = Tuple(
+        i == dim ? space.rect.pos[i] + pos : space.rect.pos[i]
+        for i=1:N
+    )
+
+    left_space = RectangularSpace(left_dims, left_pos)
+    left_node = leftchild!(node, left_space)
+    right_space = RectangularSpace(right_dims, right_pos)
+    right_node = rightchild!(node, right_space)
+
+    return left_node, right_node
 end
 
-function pack(container::Rectangle{T}, rectangles::Vector{<:RectangleSize})::BinaryNode{Rectangle{T}} where T
-	@assert ismissing(container.data)
-	root = BinaryNode(container)
-	for rect_size in rectangles
-		insert!(root, rect_size)
-	end
+function partition!(
+    node::SpaceNode{N},
+    rect::Rectangle{N},
+)::NTuple{N,Float64} where {N}
+    # We want to split the dimensions in descending order
+    # to leave as much contiguous space as possible
+    space = node.data
+    dim_diff = space.rect.dims .- rect.dims |> collect
+    dim_order = sortperm(dim_diff, rev = true)
 
-	return root
+    target = node
+    for dim in dim_order
+        # Always split the left child
+        target, _ = partition!(target, dim, rect.dims[dim])
+    end
+
+    # The leftmost space is now occupied
+    target.data.empty = false
+    # Return the newly occupied position
+    return target.data.rect.pos
+end
+
+function insert!(
+    node::SpaceNode{N},
+    rect::Rectangle{N},
+)::Union{NTuple{N,Float64},Nothing} where {N}
+    # TODO: Use BFS? Or iterate over leaves, sorted by size?
+    if !isleaf(node)
+        new_pos = insert!(node.left, rect)
+        if new_pos != nothing
+            return new_pos
+        else
+            return insert!(node.right, rect)
+        end
+    else
+        space = node.data
+        if isempty(space)
+            if samesize(rect, space)
+                space.empty = false
+                return space.rect.pos
+            elseif fits(rect, space)
+                return partition!(node, rect)
+            end
+        end
+    end
+    return nothing
+end
+
+function pack(
+    container_dims::NTuple{N,<:Real},
+    rect_dims::Vector{NTuple{N,T}},
+)::PackResult{N} where {T<:Real} where {N}
+    root = BinaryNode(RectangularSpace(container_dims, (0, 0)))
+    rectangles = Rectangle.(rect_dims)
+    positions = PackResult{N}([])
+    for rect in rectangles
+        pos = insert!(root, rect)
+        push!(positions, pos)
+    end
+
+    return positions
+end
+
+function pack(
+    container_dims::NTuple{N,<:Real},
+    rect_dims::Vector{Vector{T}},
+)::PackResult{N} where {T<:Real} where {N}
+    return pack(container_dims, rect_dims .|> Tuple)
 end
 
 end # module

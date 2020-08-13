@@ -4,6 +4,8 @@ using Plots
 
 using ..Structs
 
+export plot_rectangles
+
 rectangle(x, y, w, h) = Shape(x .+ [0, w, w, 0], y .+ [0, 0, h, h])
 
 function plot_rectangles(rect_sizes, positions)

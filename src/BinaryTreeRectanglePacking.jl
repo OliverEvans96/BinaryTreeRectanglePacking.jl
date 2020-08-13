@@ -43,7 +43,7 @@ function run(
     end
 
     if plotting
-        p = Plotting.plot_rectangles(packed_sizes, packed_positions .|> collect)
+        p = plot_rectangles(packed_sizes, packed_positions .|> collect)
         display(p)
     end
 

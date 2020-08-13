@@ -9,6 +9,8 @@ include("Plotting.jl")
 
 using .Structs, .Packing, .Plotting
 
+export pack
+
 function run(
     W::Real,
     H::Real,

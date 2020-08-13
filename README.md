@@ -24,8 +24,8 @@ Give it the dimensions of your container and (pre-sorted) rectangles. It will re
 
 ## Examples
 
-![fig1](https://imgur.com/4ayWLDO)
+![fig1](https://i.imgur.com/4ayWLDO.png)
 
-![fig2](https://imgur.com/YBWrKmh)
+![fig2](https://i.imgur.com/YBWrKmh.png)
 
-![fig3](https://imgur.com/QVFw2jA)
+![fig3](https://i.imgur.com/QVFw2jA.png)

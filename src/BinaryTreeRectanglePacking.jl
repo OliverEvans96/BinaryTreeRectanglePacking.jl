@@ -3,9 +3,11 @@ module BinaryTreeRectanglePacking
 using AbstractTrees
 using Plots
 
+include("Structs.jl")
 include("Packing.jl")
+include("Plotting.jl")
 
-using .Packing: pack
+using .Structs, .Packing, .Plotting
 
 export pack
 

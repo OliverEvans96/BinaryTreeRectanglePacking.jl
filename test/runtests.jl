@@ -3,7 +3,7 @@ using Random
 
 using BinaryTreeRectanglePacking: pack
 
-function run(
+function run_pack(
     W::Real,
     H::Real,
     num_shapes::Integer,
@@ -35,7 +35,7 @@ function run(
     end
 
     if plotting
-        p = plot_rectangles(packed_sizes, packed_positions .|> collect)
+        p = BinaryTreeRectanglePacking.plot_rectangles(packed_sizes, packed_positions .|> collect)
         display(p)
     end
 
@@ -47,6 +47,6 @@ H = 10
 W = 10
 num_shapes = 50
 num_rectangles = 400
-efficiency, num_packed = run(H, W, num_shapes, num_rectangles)
+efficiency, num_packed = run_pack(H, W, num_shapes, num_rectangles)
 @assert efficiency > 0.5
 @assert num_packed / num_rectangles > 0.5

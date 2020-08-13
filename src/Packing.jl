@@ -92,7 +92,7 @@ function pack(
     container_dims::NTuple{N,<:Real},
     rect_dims::Vector{NTuple{N,T}},
 )::PackResult{N} where {T<:Real} where {N}
-    root = BinaryNode(RectangularSpace(container_dims, (0, 0)))
+    root = BinaryNode(RectangularSpace(container_dims, Tuple(zeros(N))))
     rectangles = Rectangle.(rect_dims)
     positions = PackResult{N}([])
     for rect in rectangles
